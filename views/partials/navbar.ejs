@@ -1,0 +1,18 @@
+<nav class="navbar">
+    <a href="/" class="nav-brand">
+        <span class="nav-logo">⚡</span>
+        <span>CyberCore</span>
+    </a>
+    <div class="nav-links">
+        <% if (user) { %>
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <div class="nav-user">
+                <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="<%= user.username %>" class="nav-avatar">
+                <span><%= user.username %></span>
+            </div>
+            <a href="/logout" class="btn btn-outline btn-sm">Sair</a>
+        <% } else { %>
+            <a href="/auth/discord" class="btn btn-primary btn-sm">Login</a>
+        <% } %>
+    </div>
+</nav>
