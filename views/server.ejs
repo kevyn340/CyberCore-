@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= guild.name %> — CyberCore</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="container dashboard-container">
+        <!-- Header do servidor -->
+        <div class="server-header">
+            <% if (guild.icon) { %>
+                <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png" class="server-icon" alt="<%= guild.name %>">
+            <% } else { %>
+                <div class="server-icon-placeholder"><%= guild.name.charAt(0) %></div>
+            <% } %>
+            <div>
+                <h1><%= guild.name %></h1>
+                <span class="badge badge-online">🟢 Online</span>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number"><%= openTickets.length %></div>
+                <div class="stat-label">🎫 Tickets Abertos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.tickets_closed %></div>
+                <div class="stat-label">✅ Tickets Fechados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.users_served %></div>
+                <div class="stat-label">👥 Atendidos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.punishments_given %></div>
+                <div class="stat-label">⚖️ Punições</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.members_joined %></div>
+                <div class="stat-label">📥 Entradas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.messages_deleted %></div>
+                <div class="stat-label">🗑️ Msgs Deletadas</div>
+            </div>
+        </div>
+
+        <!-- Configurações -->
+        <div class="config-section">
+            <h2>⚙️ Configurações</h2>
+            <form id="config-form" class="config-form">
+                <div class="form-group">
+                    <label>ID do Cargo Staff</label>
+                    <input type="text" name="staff_role_id" value="<%= config.staff_role_id || '' %>" placeholder="Ex: 123456789012345678" class="cyber-input">
+                    <span class="hint">Cargo que pode gerenciar tickets e usar moderação</span>
+                </div>
+                <div class="form-group">
+                    <label>ID do Canal de Logs</label>
+                    <input type="text" name="log_channel_id" value="<%= config.log_channel_id || '' %>" placeholder="Ex: 123456789012345678" class="cyber-input">
+                    <span class="hint">Canal onde os logs serão enviados</span>
+                </div>
+                <div class="form-group">
+                    <label>ID da Categoria de Tickets</label>
+                    <input type="text" name="ticket_category_id" value="<%= config.ticket_category_id || '' %>" placeholder="Ex: 123456789012345678" class="cyber-input">
+                    <span class="hint">Categoria onde os canais de ticket serão criados</span>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Salvar Configurações</button>
+                <span id="save-status" class="save-status"></span>
+            </form>
+        </div>
+
+        <!-- Tickets abertos -->
+        <% if (openTickets.length > 0) { %>
+        <div class="tickets-section">
+            <h2>🎫 Tickets Abertos (<%= openTickets.length %>)</h2>
+            <div class="tickets-table-wrapper">
+                <table class="cyber-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Categoria</th>
+                            <th>Prioridade</th>
+                            <th>Status</th>
+                            <th>Criado em</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% openTickets.forEach(ticket => { %>
+                        <tr>
+                            <td><code><%= ticket.ticket_id %></code></td>
+                            <td><%= ticket.category %></td>
+                            <td>
+                                <span class="priority-badge priority-<%= ticket.priority %>">
+                                    <%= ticket.priority === 'high' ? '🔴 Alta' : ticket.priority === 'medium' ? '🟡 Média' : '🟢 Baixa' %>
+                                </span>
+                            </td>
+                            <td><span class="badge badge-online">Aberto</span></td>
+                            <td><%= new Date(ticket.created_at * 1000).toLocaleString('pt-BR') %></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <% } %>
+
+        <div class="back-link">
+            <a href="/dashboard" class="btn btn-outline">← Voltar</a>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+    <script src="/js/main.js"></script>
+    <script>
+        document.getElementById('config-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const data = Object.fromEntries(new FormData(form));
+            const status = document.getElementById('save-status');
+
+            try {
+                const res = await fetch('/api/<%= guild.id %>/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const json = await res.json();
+                status.textContent = json.success ? '✅ Salvo com sucesso!' : '❌ Erro ao salvar.';
+                status.className = 'save-status ' + (json.success ? 'success' : 'error');
+            } catch {
+                status.textContent = '❌ Erro de conexão.';
+                status.className = 'save-status error';
+            }
+            setTimeout(() => { status.textContent = ''; }, 3000);
+        });
+    </script>
+</body>
+</html>
