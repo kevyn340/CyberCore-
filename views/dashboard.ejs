@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — CyberCore</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="container dashboard-container">
+        <div class="page-header">
+            <h1>🏠 Seus Servidores</h1>
+            <p>Selecione um servidor para gerenciar</p>
+        </div>
+
+        <div class="guilds-grid">
+            <% if (guilds.length === 0) { %>
+                <div class="empty-state">
+                    <div class="empty-icon">😕</div>
+                    <h3>Nenhum servidor encontrado</h3>
+                    <p>Você não tem permissão de administrador em nenhum servidor com o bot.</p>
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=<%= process.env.CLIENT_ID %>&permissions=8&scope=bot%20applications.commands" class="btn btn-primary" target="_blank">
+                        Adicionar CyberCore
+                    </a>
+                </div>
+            <% } %>
+
+            <% guilds.forEach(guild => { %>
+                <a href="/dashboard/<%= guild.id %>" class="guild-card">
+                    <div class="guild-icon">
+                        <% if (guild.icon) { %>
+                            <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png" alt="<%= guild.name %>">
+                        <% } else { %>
+                            <div class="guild-icon-placeholder"><%= guild.name.charAt(0) %></div>
+                        <% } %>
+                    </div>
+                    <div class="guild-info">
+                        <h3><%= guild.name %></h3>
+                        <span class="guild-id">ID: <%= guild.id %></span>
+                    </div>
+                    <div class="guild-arrow">→</div>
+                </a>
+            <% }); %>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+    <script src="/js/main.js"></script>
+</body>
+</html>
